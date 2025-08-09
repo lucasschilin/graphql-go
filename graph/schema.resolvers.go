@@ -13,7 +13,17 @@ import (
 
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	panic(fmt.Errorf("not implemented: CreateLink - createLink"))
+	user := model.User{
+		Name: "Amanda",
+	}
+	link := model.Link{
+		Title:   input.Title,
+		Address: input.Address,
+		User:    &user,
+	}
+
+	return &link, nil
+
 }
 
 // CreateUser is the resolver for the createUser field.
