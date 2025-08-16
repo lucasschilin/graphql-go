@@ -7,23 +7,27 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/lucasschilin/hackernews-graphql-go/graph/model"
+	"github.com/lucasschilin/hackernews-graphql-go/internal/links"
 )
 
 // CreateLink is the resolver for the createLink field.
-func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	user := model.User{
-		Name: "Amanda",
-	}
-	link := model.Link{
-		Title:   input.Title,
-		Address: input.Address,
-		User:    &user,
-	}
+func (r *mutationResolver) CreateLink(
+	ctx context.Context, input model.NewLink,
+) (*model.Link, error) {
+	var link links.Link
 
-	return &link, nil
+	link.Title = input.Title
+	link.Address = input.Address
+	linkID := link.Save()
 
+	return &model.Link{
+		ID:      strconv.FormatInt(linkID, 10),
+		Title:   link.Title,
+		Address: link.Address,
+	}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
