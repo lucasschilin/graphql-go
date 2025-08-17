@@ -7,7 +7,10 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.30
 )
 
-require github.com/go-chi/chi/v5 v5.2.2 // indirect
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	github.com/go-chi/chi/v5 v5.2.2 // indirect
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
