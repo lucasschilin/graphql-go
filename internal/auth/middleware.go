@@ -52,3 +52,8 @@ func Middleware() func(http.Handler) http.Handler {
 		})
 	}
 }
+
+func ForContext(ctx context.Context) *users.User {
+	raw, _ := ctx.Value(userCtxKey).(*users.User)
+	return raw
+}

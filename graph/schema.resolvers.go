@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/lucasschilin/hackernews-graphql-go/graph/model"
+	"github.com/lucasschilin/hackernews-graphql-go/internal/auth"
 	"github.com/lucasschilin/hackernews-graphql-go/internal/links"
 	"github.com/lucasschilin/hackernews-graphql-go/internal/users"
 	"github.com/lucasschilin/hackernews-graphql-go/pkg/jwt"
@@ -19,16 +20,28 @@ import (
 func (r *mutationResolver) CreateLink(
 	ctx context.Context, input model.NewLink,
 ) (*model.Link, error) {
+
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return &model.Link{}, fmt.Errorf("access denied")
+	}
+
 	var link links.Link
 
 	link.Title = input.Title
 	link.Address = input.Address
+	link.User = user
+
 	linkID := link.Save()
 
 	return &model.Link{
 		ID:      strconv.FormatInt(linkID, 10),
 		Title:   link.Title,
 		Address: link.Address,
+		User: &model.User{
+			ID:   link.User.ID,
+			Name: link.User.Username,
+		},
 	}, nil
 }
 
@@ -92,10 +105,15 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	dbLinks := links.GetAll()
 
 	for _, link := range dbLinks {
+		graphqlUser := &model.User{
+			ID:   link.User.ID,
+			Name: link.User.Username,
+		}
 		resultLinks = append(resultLinks, &model.Link{
 			ID:      link.ID,
 			Title:   link.Title,
 			Address: link.Address,
+			User:    graphqlUser,
 		})
 	}
 
