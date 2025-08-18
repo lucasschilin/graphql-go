@@ -11,6 +11,8 @@ import (
 
 	"github.com/lucasschilin/hackernews-graphql-go/graph/model"
 	"github.com/lucasschilin/hackernews-graphql-go/internal/links"
+	"github.com/lucasschilin/hackernews-graphql-go/internal/users"
+	"github.com/lucasschilin/hackernews-graphql-go/pkg/jwt"
 )
 
 // CreateLink is the resolver for the createLink field.
@@ -32,7 +34,18 @@ func (r *mutationResolver) CreateLink(
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	var user users.User
+
+	user.Username = input.Username
+	user.Password = input.Password
+	user.Create()
+
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 // Login is the resolver for the login field.
