@@ -21,7 +21,7 @@ func (u *User) Create() {
 		log.Fatal()
 	}
 
-	hashedPassword, err := HashPassword(u.Password)
+	hashedPassword, _ := HashPassword(u.Password)
 	_, err = stmt.Exec(u.Username, hashedPassword)
 	if err != nil {
 		log.Fatal()
@@ -75,4 +75,36 @@ func (u *User) Authenticate() bool {
 	}
 
 	return CheckPasswordHash(u.Password, hashedPassword)
+}
+
+func GetAll() []User {
+	stmt, err := database.Db.Prepare("SELECT ID, Username FROM Users")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		log.Fatal()
+	}
+	defer rows.Close()
+
+	var users []User
+	for rows.Next() {
+		var user User
+
+		err := rows.Scan(&user.ID, &user.Username)
+		if err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return users
+
 }

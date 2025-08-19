@@ -17,10 +17,7 @@ import (
 )
 
 // CreateLink is the resolver for the createLink field.
-func (r *mutationResolver) CreateLink(
-	ctx context.Context, input model.NewLink,
-) (*model.Link, error) {
-
+func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return &model.Link{}, fmt.Errorf("access denied")
@@ -79,7 +76,6 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 	}
 
 	return token, nil
-
 }
 
 // RefreshToken is the resolver for the refreshToken field.
@@ -99,7 +95,6 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
-
 	var resultLinks []*model.Link
 
 	dbLinks := links.GetAll()
@@ -120,6 +115,22 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	return resultLinks, nil
 }
 
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	var resultUsers []*model.User
+
+	dbUsers := users.GetAll()
+
+	for _, user := range dbUsers {
+		resultUsers = append(resultUsers, &model.User{
+			ID:   user.ID,
+			Name: user.Username,
+		})
+	}
+
+	return resultUsers, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -128,18 +139,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
-}
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
-}
-*/
