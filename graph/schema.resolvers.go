@@ -43,19 +43,18 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) 
 }
 
 // CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
 	var user users.User
 
 	user.Username = input.Username
 	user.Password = input.Password
-	user.Create()
 
-	token, err := jwt.GenerateToken(user.Username)
-	if err != nil {
-		return "", err
-	}
+	userID := user.Create()
 
-	return token, nil
+	return &model.User{
+		ID:   strconv.FormatInt(userID, 10),
+		Name: user.Username,
+	}, nil
 }
 
 // Login is the resolver for the login field.
