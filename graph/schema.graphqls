@@ -10,6 +10,10 @@ type User {
   name: String!
 }
 
+type AccessToken {
+  access_token: String!
+}
+
 type Query {
   links: [Link!]!
   users: [User!]!
@@ -37,7 +41,7 @@ input Login {
 type Mutation {
   createLink(input: NewLink!): Link!
   createUser(input: NewUser!): User!   
-  login(input: Login!): String!
+  login(input: Login!): AccessToken!
 
-  refreshToken(input: RefreshTokenInput!): String!
+  refreshToken(input: RefreshTokenInput!): AccessToken!
 }

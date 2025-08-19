@@ -58,7 +58,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 }
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
+func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model.AccessToken, error) {
 	user := users.User{
 		Username: input.Username,
 		Password: input.Password,
@@ -66,30 +66,34 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 
 	correct := user.Authenticate()
 	if !correct {
-		return "", &users.WrongUsernameOrPasswordError{}
+		return nil, &users.WrongUsernameOrPasswordError{}
 	}
 
 	token, err := jwt.GenerateToken(user.Username)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return &model.AccessToken{
+		AccessToken: token,
+	}, nil
 }
 
 // RefreshToken is the resolver for the refreshToken field.
-func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
+func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (*model.AccessToken, error) {
 	username, err := jwt.ParseToken(input.Token)
 	if err != nil {
-		return "", fmt.Errorf("access denied")
+		return nil, fmt.Errorf("access denied")
 	}
 
 	token, err := jwt.GenerateToken(username)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return &model.AccessToken{
+		AccessToken: token,
+	}, nil
 }
 
 // Links is the resolver for the links field.

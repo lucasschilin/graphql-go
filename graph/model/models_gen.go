@@ -2,6 +2,10 @@
 
 package model
 
+type AccessToken struct {
+	AccessToken string `json:"access_token"`
+}
+
 type Link struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
