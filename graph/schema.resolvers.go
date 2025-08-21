@@ -16,6 +16,16 @@ import (
 	"github.com/lucasschilin/hackernews-graphql-go/pkg/jwt"
 )
 
+// User is the resolver for the user field.
+func (r *linkResolver) User(ctx context.Context, obj *model.Link) (*model.User, error) {
+	dbUser := users.GetByLinkID(obj.ID)
+
+	return &model.User{
+		ID:   dbUser.ID,
+		Name: dbUser.Username,
+	}, nil
+}
+
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
 	user := auth.ForContext(ctx)
@@ -35,10 +45,6 @@ func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) 
 		ID:      strconv.FormatInt(linkID, 10),
 		Title:   link.Title,
 		Address: link.Address,
-		User: &model.User{
-			ID:   link.User.ID,
-			Name: link.User.Username,
-		},
 	}, nil
 }
 
@@ -103,15 +109,10 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	dbLinks := links.GetAll()
 
 	for _, link := range dbLinks {
-		graphqlUser := &model.User{
-			ID:   link.User.ID,
-			Name: link.User.Username,
-		}
 		resultLinks = append(resultLinks, &model.Link{
 			ID:      link.ID,
 			Title:   link.Title,
 			Address: link.Address,
-			User:    graphqlUser,
 		})
 	}
 
@@ -151,6 +152,9 @@ func (r *userResolver) Links(ctx context.Context, obj *model.User) ([]*model.Lin
 	return resultLinks, nil
 }
 
+// Link returns LinkResolver implementation.
+func (r *Resolver) Link() LinkResolver { return &linkResolver{r} }
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
@@ -160,6 +164,7 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type linkResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

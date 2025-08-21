@@ -45,6 +45,25 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
+func GetByLinkID(linkID string) *User {
+	stmt, err := database.Db.Prepare("SELECT U.ID, U.Username FROM Users U JOIN Links L ON L.UserID = U.ID WHERE L.ID = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	row := stmt.QueryRow(linkID)
+
+	var user User
+	err = row.Scan(&user.ID, &user.Username)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Print(err)
+		}
+		return nil
+	}
+
+	return &user
+}
+
 func GetUserIdByUsername(username string) (int, error) {
 	statement, err := database.Db.Prepare("select ID from Users WHERE Username = ?")
 	if err != nil {
