@@ -1,3 +1,5 @@
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
 type Link {
   id: ID!
   title: String!
@@ -8,6 +10,7 @@ type Link {
 type User {
   id: ID!
   name: String!
+  links: [Link!]! @goField(forceResolver: true)
 }
 
 type AccessToken {

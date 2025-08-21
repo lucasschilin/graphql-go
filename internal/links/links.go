@@ -66,3 +66,34 @@ func GetAll() []Link {
 
 	return links
 }
+
+func GetByUserID(userID string) []Link {
+	stmt, err := database.Db.Prepare("SELECT ID, Title, Address FROM Links WHERE UserID = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(userID)
+	if err != nil {
+		log.Fatal()
+	}
+	defer rows.Close()
+
+	var links []Link
+	for rows.Next() {
+		var link Link
+		err := rows.Scan(&link.ID, &link.Title, &link.Address)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		links = append(links, link)
+	}
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return links
+
+}
